@@ -32,9 +32,8 @@ async function generateSpecificAccountsReport() {
     '708155928423030',
   ];
 
+  // Calcular rango de fechas: solo el día actual
   const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
   
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -44,7 +43,7 @@ async function generateSpecificAccountsReport() {
   };
   
   const dateRange = {
-    since: formatDate(yesterday),
+    since: formatDate(today),
     until: formatDate(today)
   };
 

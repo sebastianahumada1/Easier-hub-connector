@@ -449,7 +449,7 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
    - Manualmente desde la pestaña Actions en GitHub
 
 3. **Qué hace:**
-   - Obtiene datos de Facebook del día anterior hasta hoy
+   - Obtiene datos de Facebook del día actual
    - Procesa las 9 cuentas específicas configuradas
    - Sube todo a BigQuery en la tabla `campaign_reports_specific`
 

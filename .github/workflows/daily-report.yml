@@ -2,8 +2,8 @@ name: Daily Campaign Report Update
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 2:00 AM UTC (9:00 PM Colombia del día anterior)
-    # Ajusta el horario según tu zona horaria
+    # Se ejecuta todos los días a las 2:00 AM UTC
+    # Obtiene datos del día actual (hoy)
     - cron: '0 2 * * *'
   
   # Permite ejecución manual desde GitHub

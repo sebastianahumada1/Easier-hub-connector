@@ -114,7 +114,7 @@ El workflow hace lo siguiente:
 3. ✅ Instala las dependencias del proyecto
 4. ✅ Crea los archivos de configuración desde los secrets
 5. ✅ Ejecuta `npm run specific-accounts` que:
-   - Calcula el rango de fechas (ayer hasta hoy)
+   - Calcula el rango de fechas (solo el día actual)
    - Obtiene datos de Facebook para las 9 cuentas específicas
    - Sube los datos a BigQuery en la tabla `campaign_reports_specific`
 6. ✅ Limpia los archivos de credenciales
