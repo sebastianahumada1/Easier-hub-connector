@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { TokenData } from './types';
+import { TokenData, GHLAccount } from './types';
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const TOKENS_FILE = path.join(DATA_DIR, 'tokens.json');
+const GHL_CONFIG_FILE = path.join(DATA_DIR, 'ghl-accounts.json');
 
 export class Storage {
   constructor() {
@@ -79,6 +80,43 @@ export class Storage {
    */
   getAllTokens(): TokenData[] {
     return this.readTokens();
+  }
+
+  /**
+   * Lee todas las cuentas de GHL almacenadas
+   */
+  readGHLAccounts(): GHLAccount[] {
+    try {
+      if (!fs.existsSync(GHL_CONFIG_FILE)) {
+        return [];
+      }
+
+      const data = fs.readFileSync(GHL_CONFIG_FILE, 'utf-8');
+      return JSON.parse(data);
+    } catch (error: any) {
+      console.error('GHL: Error leyendo cuentas:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Guarda todas las cuentas de GHL
+   */
+  writeGHLAccounts(accounts: GHLAccount[]): void {
+    try {
+      fs.writeFileSync(GHL_CONFIG_FILE, JSON.stringify(accounts, null, 2), 'utf-8');
+      console.log('GHL: Cuentas guardadas exitosamente');
+    } catch (error: any) {
+      console.error('GHL: Error guardando cuentas:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene todas las cuentas de GHL
+   */
+  getAllGHLAccounts(): GHLAccount[] {
+    return this.readGHLAccounts();
   }
 }
 

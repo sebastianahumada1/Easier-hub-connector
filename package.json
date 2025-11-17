@@ -18,6 +18,7 @@
     "verify-leads": "npm run build && node dist/verify-leads.js",
     "check-month": "npm run build && node dist/check-month.js",
     "specific-accounts": "npm run build && node dist/generate-specific-accounts.js",
+    "ghl-report": "npm run build && node dist/generate-ghl-report.js",
     "dev": "ts-node src/index.ts"
   },
   "keywords": [
