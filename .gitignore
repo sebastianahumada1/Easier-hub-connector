@@ -10,8 +10,11 @@ dist/
 # Token storage (ignore this JSON file specifically)
 data/tokens.json
 
-# Note: Google Cloud credentials JSON is allowed
-# engaged-lamp-470319-j9-*.json files are accessible
+# Google Cloud credentials (should not be committed)
+engaged-lamp-*.json
+*.json
+!package.json
+!tsconfig.json
 
 # Reports
 reports/
