@@ -1,0 +1,43 @@
+{
+  "name": "easier-hub-connector",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de tokens de Facebook con auto-renovación",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "init": "npm run build && node dist/init.js",
+    "start": "npm run build && node dist/index.js",
+    "test": "npm run build && node dist/test.js",
+    "report": "npm run build && node dist/generate-report.js",
+    "upload-bq": "npm run build && node dist/upload-to-bigquery.js",
+    "recreate-bq-table": "npm run build && node dist/recreate-table.js",
+    "split-bq-tables": "npm run build && node dist/split-tables.js",
+    "add-age": "npm run build && node dist/add-age-data.js",
+    "full-demo": "npm run build && node dist/full-demographics.js",
+    "check-app": "npm run build && node dist/check-app-id.js",
+    "verify-leads": "npm run build && node dist/verify-leads.js",
+    "check-month": "npm run build && node dist/check-month.js",
+    "specific-accounts": "npm run build && node dist/generate-specific-accounts.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "facebook",
+    "token",
+    "auto-renewal"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.3.0",
+    "axios": "^1.6.0",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
+}

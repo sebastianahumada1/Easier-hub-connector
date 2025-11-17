@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# Token storage (ignore this JSON file specifically)
+data/tokens.json
+
+# Note: Google Cloud credentials JSON is allowed
+# engaged-lamp-470319-j9-*.json files are accessible
+
+# Reports
+reports/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
