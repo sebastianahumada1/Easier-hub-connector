@@ -428,6 +428,33 @@ FacebookTokenManager: Verificación completada
 - Puedes ajustar el horario del cron job en `src/scheduler.ts` (línea con `cron.schedule`)
 - Para producción, considera usar PM2 o similar para mantener el proceso ejecutándose
 
+## 🤖 Automatización con GitHub Actions
+
+### Configurar Actualización Diaria Automática
+
+El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente la actualización de BigQuery todos los días.
+
+**📚 Ver guía completa:** [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md)
+
+#### Resumen rápido:
+
+1. **Configurar 4 secrets en GitHub:**
+   - `TOKENS_JSON` - Contenido de `data/tokens.json`
+   - `GOOGLE_CREDENTIALS` - Contenido de tu archivo de credenciales de GCP
+   - `BIGQUERY_PROJECT_ID` - ID del proyecto de BigQuery
+   - `BIGQUERY_DATASET_ID` - ID del dataset de BigQuery
+
+2. **El workflow se ejecutará:**
+   - Automáticamente todos los días a las 2:00 AM UTC
+   - Manualmente desde la pestaña Actions en GitHub
+
+3. **Qué hace:**
+   - Obtiene datos de Facebook del día anterior hasta hoy
+   - Procesa las 9 cuentas específicas configuradas
+   - Sube todo a BigQuery en la tabla `campaign_reports_specific`
+
+**Ver:** `.github/workflows/daily-report.yml` para más detalles
+
 ## 🤝 Soporte
 
 Si encuentras problemas, verifica:
