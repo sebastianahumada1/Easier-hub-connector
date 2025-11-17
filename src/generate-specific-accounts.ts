@@ -295,7 +295,14 @@ async function generateSpecificAccountsReport() {
         const connected = await uploader.testConnection();
         if (connected) {
           await uploader.createTableIfNotExists();
-          await uploader.uploadFromReports(allReports);
+          
+          // Agregar app_id a cada reporte antes de subirlo
+          const reportsWithAppId = allReports.map(report => ({
+            ...report,
+            appId: targetAppId
+          }));
+          
+          await uploader.uploadFromReports(reportsWithAppId);
           console.log(`✅ Datos subidos a BigQuery exitosamente en tabla: ${newTableId}\n`);
         } else {
           console.log('⚠ No se pudo conectar a BigQuery\n');

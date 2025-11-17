@@ -1,0 +1,54 @@
+name: Daily Campaign Report Update
+
+on:
+  schedule:
+    # Se ejecuta todos los días a las 2:00 AM UTC (9:00 PM Colombia del día anterior)
+    # Ajusta el horario según tu zona horaria
+    - cron: '0 2 * * *'
+  
+  # Permite ejecución manual desde GitHub
+  workflow_dispatch:
+
+jobs:
+  update-bigquery:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Create data directory
+        run: mkdir -p data
+      
+      - name: Create tokens file
+        run: echo '${{ secrets.TOKENS_JSON }}' > data/tokens.json
+      
+      - name: Create Google Cloud credentials
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > google-credentials.json
+      
+      - name: Create .env file
+        run: |
+          echo "BIGQUERY_ENABLED=true" >> .env
+          echo "BIGQUERY_PROJECT_ID=${{ secrets.BIGQUERY_PROJECT_ID }}" >> .env
+          echo "BIGQUERY_DATASET_ID=${{ secrets.BIGQUERY_DATASET_ID }}" >> .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json" >> .env
+      
+      - name: Run report generation
+        run: npm run specific-accounts
+      
+      - name: Clean up credentials
+        if: always()
+        run: |
+          rm -f google-credentials.json
+          rm -f data/tokens.json
+          rm -f .env
+
