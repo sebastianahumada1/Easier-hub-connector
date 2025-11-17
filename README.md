@@ -445,7 +445,7 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
    - `BIGQUERY_DATASET_ID` - ID del dataset de BigQuery
 
 2. **El workflow se ejecutará:**
-   - Automáticamente todos los días a las 2:00 AM UTC
+   - Automáticamente todos los días a las 11:00 PM hora Colombia (4:00 AM UTC)
    - Manualmente desde la pestaña Actions en GitHub
 
 3. **Qué hace:**

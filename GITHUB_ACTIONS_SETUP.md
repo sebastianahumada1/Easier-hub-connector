@@ -61,7 +61,7 @@ facebook_ads
 ### 2. Horario del Cronjob
 
 El workflow está configurado para ejecutarse:
-- **Automáticamente**: Todos los días a las 2:00 AM UTC (9:00 PM hora Colombia del día anterior)
+- **Automáticamente**: Todos los días a las 11:00 PM hora Colombia (4:00 AM UTC)
 - **Manualmente**: Desde la pestaña "Actions" en GitHub
 
 #### Cambiar el horario
@@ -69,10 +69,11 @@ El workflow está configurado para ejecutarse:
 Edita el archivo `.github/workflows/daily-report.yml` línea 6:
 
 ```yaml
-- cron: '0 2 * * *'  # Formato: minuto hora * * *
+- cron: '0 4 * * *'  # Formato: minuto hora * * *
 ```
 
 Ejemplos de horarios (todos en UTC):
+- `'0 4 * * *'` = 4:00 AM UTC = 11:00 PM Colombia (día anterior)
 - `'0 14 * * *'` = 2:00 PM UTC = 9:00 AM Colombia
 - `'30 14 * * *'` = 2:30 PM UTC = 9:30 AM Colombia
 - `'0 3 * * *'` = 3:00 AM UTC = 10:00 PM Colombia (día anterior)
