@@ -9,11 +9,12 @@ dotenv.config();
 
 /**
  * Script para generar reportes de campañas para cuentas específicas
+ * con rango de fechas FIJO: 2025-11-01 al 2025-11-02
  * y subirlos a una nueva tabla en BigQuery
  */
-async function generateSpecificAccountsReport() {
+async function generateCustomDatesReport() {
   console.log('='.repeat(150));
-  console.log('FacebookTokenManager: Generador de Reportes para Cuentas Específicas');
+  console.log('FacebookTokenManager: Generador de Reportes con Fechas Personalizadas (2025-11-01 al 2025-11-02)');
   console.log('='.repeat(150));
   console.log();
 
@@ -32,19 +33,10 @@ async function generateSpecificAccountsReport() {
     '708155928423030',
   ];
 
-  // Calcular rango de fechas: solo el día actual
-  const today = new Date();
-  
-  const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
+  // ⭐ FECHAS FIJAS: 1 nov 2025 al 2 nov 2025
   const dateRange = {
-    since: formatDate(today),
-    until: formatDate(today)
+    since: '2025-11-01',
+    until: '2025-11-20'
   };
 
   const newTableId = 'campaign_reports_specific'; // Nueva tabla en BigQuery
@@ -59,7 +51,7 @@ async function generateSpecificAccountsReport() {
 
   console.log(`FacebookTokenManager: Procesando App ID: ${targetAppId}`);
   console.log(`FacebookTokenManager: Cuentas objetivo: ${targetAccountIds.length}`);
-  console.log(`FacebookTokenManager: Período: ${dateRange.since} - ${dateRange.until}\n`);
+  console.log(`FacebookTokenManager: Período FIJO: ${dateRange.since} - ${dateRange.until}\n`);
 
   try {
     const client = createFacebookClient(tokenData.appId);
@@ -320,12 +312,12 @@ async function generateSpecificAccountsReport() {
   }
 
   console.log('='.repeat(150));
-  console.log('FacebookTokenManager: Generación de reportes completada');
+  console.log('FacebookTokenManager: Generación de reportes con fechas personalizadas completada');
   console.log('='.repeat(150));
 }
 
 // Ejecutar
-generateSpecificAccountsReport().catch((error) => {
+generateCustomDatesReport().catch((error) => {
   console.error('FacebookTokenManager: Error fatal durante la generación de reportes:', error);
   process.exit(1);
 });
