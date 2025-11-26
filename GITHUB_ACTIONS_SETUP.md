@@ -11,7 +11,7 @@ https://github.com/sebastianahumada1/Easier-hub-connector
 
 Luego navega a: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-Crea los siguientes 5 secrets:
+Crea los siguientes 6 secrets:
 
 #### a) `TOKENS_JSON`
 Copia el contenido completo de tu archivo `data/tokens.json`:
@@ -69,6 +69,18 @@ pit-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 2. Settings → API Keys
 3. Crea un nuevo API key con los permisos necesarios
 4. Copia el token que empieza con `pit-`
+
+#### f) `GHL_LOCATION_ID`
+Tu Location ID de GoHighLevel:
+```
+tu-location-id-aqui
+```
+
+**Cómo obtener tu Location ID:**
+1. Ve a tu cuenta de GoHighLevel
+2. El Location ID está en la URL cuando estás dentro de tu subcuenta
+3. Ejemplo: `https://app.gohighlevel.com/v2/location/ESTE_ES_TU_LOCATION_ID/dashboard`
+4. Copia el ID que aparece después de `/location/` en la URL
 
 ### 2. Horario del Cronjob
 
@@ -131,7 +143,7 @@ El workflow hace lo siguiente:
    - Obtiene datos de Facebook para las 9 cuentas específicas
    - Sube los datos a BigQuery en la tabla `campaign_reports_specific`
 6. ✅ Ejecuta `npm run ghl-report` que:
-   - Obtiene el Location ID automáticamente de GHL
+   - Usa el Location ID configurado en el secret
    - Calcula el rango de fechas (últimos 30 días)
    - Obtiene todas las citas (appointments) del período
    - Calcula métricas agregadas
@@ -229,7 +241,7 @@ ORDER BY date DESC
 
 ## 🎯 Próximos Pasos
 
-1. Configura los 5 secrets en GitHub
+1. Configura los 6 secrets en GitHub
 2. Ejecuta el workflow manualmente para probar
 3. Verifica que los datos lleguen a BigQuery
 4. El workflow se ejecutará automáticamente todos los días

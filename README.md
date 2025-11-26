@@ -448,21 +448,27 @@ El sistema recolecta métricas de citas (appointments) de GoHighLevel y las sube
    - Settings → API Keys
    - Crea un nuevo API key (tipo `pit-`)
 
-2. **Configura las variables de entorno en `.env`:**
+2. **Obtén tu Location ID:**
+   - Ve a tu cuenta de GoHighLevel
+   - El Location ID está en la URL cuando estás dentro de tu subcuenta
+   - Ejemplo: `https://app.gohighlevel.com/v2/location/ESTE_ES_TU_LOCATION_ID/dashboard`
+
+3. **Configura las variables de entorno en `.env`:**
 
 ```env
 # GoHighLevel Configuration
 GHL_API_KEY=pit-tu-token-aqui
+GHL_LOCATION_ID=tu-location-id-aqui
 ```
 
-3. **Ejecuta el reporte de GHL:**
+4. **Ejecuta el reporte de GHL:**
 
 ```bash
 npm run ghl-report
 ```
 
 Este comando:
-- Obtiene automáticamente el Location ID de tu cuenta
+- Usa el Location ID configurado en `.env`
 - Recolecta todas las citas de los últimos 30 días
 - Calcula las métricas agregadas
 - Sube los datos a BigQuery en la tabla `ghl_appointments`
@@ -507,12 +513,13 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
 
 #### Resumen rápido:
 
-1. **Configurar 5 secrets en GitHub:**
+1. **Configurar 6 secrets en GitHub:**
    - `TOKENS_JSON` - Contenido de `data/tokens.json`
    - `GOOGLE_CREDENTIALS` - Contenido de tu archivo de credenciales de GCP
    - `BIGQUERY_PROJECT_ID` - ID del proyecto de BigQuery
    - `BIGQUERY_DATASET_ID` - ID del dataset de BigQuery
    - `GHL_API_KEY` - Tu API key de GoHighLevel
+   - `GHL_LOCATION_ID` - Tu Location ID de GoHighLevel
 
 2. **El workflow se ejecutará:**
    - Automáticamente todos los días a las 11:00 PM hora Colombia (4:00 AM UTC)

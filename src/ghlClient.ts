@@ -32,44 +32,24 @@ export class GHLClient {
   }
 
   /**
-   * Obtiene todas las locations disponibles para el API key
+   * Obtiene información de un location específico
    */
-  async getLocations(): Promise<GHLLocation[]> {
+  async getLocation(locationId: string): Promise<GHLLocation | null> {
     try {
-      console.log('GHL: Obteniendo locations...');
-      const response = await this.axios.get('/locations/');
+      console.log(`GHL: Obteniendo información del location ${locationId}...`);
+      const response = await this.axios.get(`/locations/${locationId}`);
       
-      if (response.data && response.data.locations) {
-        console.log(`GHL: Se encontraron ${response.data.locations.length} location(s)`);
-        return response.data.locations;
+      if (response.data && response.data.location) {
+        console.log(`GHL: Location encontrado: ${response.data.location.name}`);
+        return response.data.location;
       }
       
-      return [];
+      return null;
     } catch (error: any) {
-      console.error('GHL: Error obteniendo locations:', error.message);
+      console.error('GHL: Error obteniendo location:', error.message);
       if (error.response?.data) {
         console.error('GHL: Detalles del error:', JSON.stringify(error.response.data, null, 2));
       }
-      throw error;
-    }
-  }
-
-  /**
-   * Obtiene el primer Location ID disponible automáticamente
-   */
-  async getFirstLocationId(): Promise<string | null> {
-    try {
-      const locations = await this.getLocations();
-      if (locations.length > 0) {
-        const locationId = locations[0].id;
-        console.log(`GHL: Usando Location ID: ${locationId} (${locations[0].name})`);
-        return locationId;
-      }
-      
-      console.error('GHL: No se encontraron locations disponibles');
-      return null;
-    } catch (error) {
-      console.error('GHL: Error obteniendo Location ID automáticamente');
       return null;
     }
   }

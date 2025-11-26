@@ -42,6 +42,7 @@ jobs:
           echo "BIGQUERY_DATASET_ID=${{ secrets.BIGQUERY_DATASET_ID }}" >> .env
           echo "GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json" >> .env
           echo "GHL_API_KEY=${{ secrets.GHL_API_KEY }}" >> .env
+          echo "GHL_LOCATION_ID=${{ secrets.GHL_LOCATION_ID }}" >> .env
       
       - name: Run Facebook report generation
         run: npm run specific-accounts

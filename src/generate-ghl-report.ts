@@ -18,6 +18,7 @@ async function generateGHLReport() {
   try {
     // Leer credenciales de .env
     const ghlApiKey = process.env.GHL_API_KEY;
+    const ghlLocationId = process.env.GHL_LOCATION_ID;
     const bigqueryEnabled = process.env.BIGQUERY_ENABLED === 'true';
     const bigqueryProjectId = process.env.BIGQUERY_PROJECT_ID;
     const bigqueryDatasetId = process.env.BIGQUERY_DATASET_ID;
@@ -27,27 +28,23 @@ async function generateGHLReport() {
       throw new Error('GHL_API_KEY no está configurado en .env');
     }
 
+    if (!ghlLocationId) {
+      throw new Error('GHL_LOCATION_ID no está configurado en .env');
+    }
+
     console.log('GHL: Configuración cargada');
     console.log(`  - BigQuery habilitado: ${bigqueryEnabled}`);
+    console.log(`  - Location ID: ${ghlLocationId}`);
     console.log();
 
     // Crear cliente GHL
     const client = createGHLClient(ghlApiKey);
     
-    // Obtener Location ID automáticamente
-    console.log('GHL: Obteniendo Location ID automáticamente...');
-    const locationId = await client.getFirstLocationId();
-    
-    if (!locationId) {
-      throw new Error('No se pudo obtener el Location ID automáticamente');
-    }
-
     // Obtener información del location
-    const locations = await client.getLocations();
-    const location = locations.find(loc => loc.id === locationId);
+    const location = await client.getLocation(ghlLocationId);
     const locationName = location?.name || 'Unknown Location';
 
-    console.log(`GHL: Location seleccionado: ${locationName} (${locationId})`);
+    console.log(`GHL: Location: ${locationName} (${ghlLocationId})`);
     console.log();
 
     // Calcular rango de fechas: últimos 30 días
@@ -74,7 +71,7 @@ async function generateGHLReport() {
     // Obtener métricas
     console.log('GHL: Obteniendo y calculando métricas...');
     const metrics = await appointmentsManager.getMetrics(
-      locationId,
+      ghlLocationId,
       locationName,
       startDate,
       endDate
