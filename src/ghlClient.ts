@@ -76,7 +76,7 @@ export class GHLClient {
   /**
    * Obtiene eventos para un calendario específico
    */
-  private async getCalendarEvents(
+  async listCalendarEvents(
     calendarId: string,
     locationId: string,
     startTime: string,
@@ -152,7 +152,7 @@ export class GHLClient {
 
       for (const calendar of calendars) {
         console.log(`GHL: Obteniendo eventos del calendario "${calendar.name}" (${calendar.id})`);
-        const events = await this.getCalendarEvents(calendar.id, locationId, startTime, endTime);
+        const events = await this.listCalendarEvents(calendar.id, locationId, startTime, endTime);
 
         if (events.length === 0) {
           console.log(`GHL: El calendario ${calendar.name} no tiene eventos en el rango solicitado`);

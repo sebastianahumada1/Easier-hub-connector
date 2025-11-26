@@ -484,6 +484,16 @@ Si desde el Appointment Report exportas los IDs de las citas, puedes usarlos par
    ```
 3. El script descargará cada cita por su ID, calculará métricas básicas (confirmadas, pagadas, etc.) y las subirá a BigQuery en la misma tabla `ghl_appointments`.
 
+### Listar eventos para depuración
+
+Si necesitas validar si hay eventos en un rango específico antes de subirlos, ejecuta:
+
+```bash
+npm run ghl-list-events
+```
+
+Este comando lista en consola todos los eventos encontrados entre `2025-11-01` y `2025-11-26`, agrupados por calendario. Si no se encuentran eventos, mostrará una advertencia.
+
 ### Consultas SQL útiles en BigQuery:
 
 **Ver métricas de appointments:**
