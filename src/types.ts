@@ -31,3 +31,40 @@ export interface TokenDebugResponse {
   };
 }
 
+// GoHighLevel (GHL) Types
+export interface GHLAppointment {
+  id: string;
+  locationId: string;
+  contactId: string;
+  calendarId: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status: string; // 'confirmed', 'unconfirmed', 'paid', 'cancelled', 'showed', 'noshow'
+  appointmentStatus?: string;
+  assignedUserId?: string;
+  notes?: string;
+  [key: string]: any;
+}
+
+export interface GHLAppointmentMetrics {
+  date: string;
+  locationId: string;
+  locationName: string;
+  totalScheduled: number;
+  scheduledPaid: number;
+  showed: number;
+  closed: number;
+  scheduledConfirmed: number;
+}
+
+export interface GHLLocation {
+  id: string;
+  name: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  [key: string]: any;
+}
+

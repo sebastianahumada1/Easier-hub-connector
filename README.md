@@ -428,6 +428,75 @@ FacebookTokenManager: Verificación completada
 - Puedes ajustar el horario del cron job en `src/scheduler.ts` (línea con `cron.schedule`)
 - Para producción, considera usar PM2 o similar para mantener el proceso ejecutándose
 
+## 📱 Integración con GoHighLevel (GHL)
+
+El sistema recolecta métricas de citas (appointments) de GoHighLevel y las sube a BigQuery.
+
+### Datos de GHL recolectados:
+
+**Métricas de Appointments (Citas):**
+- **Total de citas programadas**: Combinación de no confirmadas, confirmadas y pagadas
+- **Citas programadas pagadas**: Número de citas con status "paid"
+- **Citas confirmadas**: Número de citas con status "confirmed"
+- **Citas donde asistieron (showed)**: Número de citas donde el cliente se presentó
+- **Citas cerradas**: Número de citas completadas/cerradas
+
+### Configuración:
+
+1. **Obtén tu API key de GoHighLevel:**
+   - Ve a tu cuenta de GoHighLevel
+   - Settings → API Keys
+   - Crea un nuevo API key (tipo `pit-`)
+
+2. **Configura las variables de entorno en `.env`:**
+
+```env
+# GoHighLevel Configuration
+GHL_API_KEY=pit-tu-token-aqui
+```
+
+3. **Ejecuta el reporte de GHL:**
+
+```bash
+npm run ghl-report
+```
+
+Este comando:
+- Obtiene automáticamente el Location ID de tu cuenta
+- Recolecta todas las citas de los últimos 30 días
+- Calcula las métricas agregadas
+- Sube los datos a BigQuery en la tabla `ghl_appointments`
+
+### Consultas SQL útiles en BigQuery:
+
+**Ver métricas de appointments:**
+```sql
+SELECT 
+  date,
+  location_name,
+  total_scheduled,
+  scheduled_paid,
+  showed,
+  closed,
+  scheduled_confirmed
+FROM `tu-proyecto.facebook_ads.ghl_appointments`
+ORDER BY date DESC
+```
+
+**Resumen de los últimos 30 días:**
+```sql
+SELECT 
+  location_name,
+  SUM(total_scheduled) as total_programadas,
+  SUM(scheduled_paid) as total_pagadas,
+  SUM(showed) as total_asistieron,
+  SUM(closed) as total_cerradas,
+  ROUND(AVG(showed * 100.0 / NULLIF(total_scheduled, 0)), 2) as tasa_asistencia
+FROM `tu-proyecto.facebook_ads.ghl_appointments`
+WHERE date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+GROUP BY location_name
+```
+
 ## 🤖 Automatización con GitHub Actions
 
 ### Configurar Actualización Diaria Automática
@@ -438,11 +507,12 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
 
 #### Resumen rápido:
 
-1. **Configurar 4 secrets en GitHub:**
+1. **Configurar 5 secrets en GitHub:**
    - `TOKENS_JSON` - Contenido de `data/tokens.json`
    - `GOOGLE_CREDENTIALS` - Contenido de tu archivo de credenciales de GCP
    - `BIGQUERY_PROJECT_ID` - ID del proyecto de BigQuery
    - `BIGQUERY_DATASET_ID` - ID del dataset de BigQuery
+   - `GHL_API_KEY` - Tu API key de GoHighLevel
 
 2. **El workflow se ejecutará:**
    - Automáticamente todos los días a las 11:00 PM hora Colombia (4:00 AM UTC)
@@ -452,6 +522,8 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
    - Obtiene datos de Facebook del día actual
    - Procesa las 9 cuentas específicas configuradas
    - Sube todo a BigQuery en la tabla `campaign_reports_specific`
+   - Obtiene datos de GoHighLevel de los últimos 30 días
+   - Sube métricas de appointments a BigQuery en la tabla `ghl_appointments`
 
 **Ver:** `.github/workflows/daily-report.yml` para más detalles
 

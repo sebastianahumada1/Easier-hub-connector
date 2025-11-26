@@ -19,6 +19,7 @@
     "check-month": "npm run build && node dist/check-month.js",
     "specific-accounts": "npm run build && node dist/generate-specific-accounts.js",
     "custom-dates": "npm run build && node dist/generate-specific-accounts-custom-dates.js",
+    "ghl-report": "npm run build && node dist/generate-ghl-report.js",
     "dev": "ts-node src/index.ts"
   },
   "keywords": [

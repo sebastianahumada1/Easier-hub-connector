@@ -11,7 +11,7 @@ https://github.com/sebastianahumada1/Easier-hub-connector
 
 Luego navega a: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-Crea los siguientes 4 secrets:
+Crea los siguientes 5 secrets:
 
 #### a) `TOKENS_JSON`
 Copia el contenido completo de tu archivo `data/tokens.json`:
@@ -57,6 +57,18 @@ Valor:
 ```
 facebook_ads
 ```
+
+#### e) `GHL_API_KEY`
+Tu API key de GoHighLevel (tipo `pit-`):
+```
+pit-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+**Cómo obtener tu GHL API Key:**
+1. Ve a tu cuenta de GoHighLevel
+2. Settings → API Keys
+3. Crea un nuevo API key con los permisos necesarios
+4. Copia el token que empieza con `pit-`
 
 ### 2. Horario del Cronjob
 
@@ -118,7 +130,13 @@ El workflow hace lo siguiente:
    - Calcula el rango de fechas (solo el día actual)
    - Obtiene datos de Facebook para las 9 cuentas específicas
    - Sube los datos a BigQuery en la tabla `campaign_reports_specific`
-6. ✅ Limpia los archivos de credenciales
+6. ✅ Ejecuta `npm run ghl-report` que:
+   - Obtiene el Location ID automáticamente de GHL
+   - Calcula el rango de fechas (últimos 30 días)
+   - Obtiene todas las citas (appointments) del período
+   - Calcula métricas agregadas
+   - Sube los datos a BigQuery en la tabla `ghl_appointments`
+7. ✅ Limpia los archivos de credenciales
 
 ## 📊 Tablas de BigQuery
 
@@ -132,6 +150,60 @@ Los datos se guardan en:
   - Datos demográficos (gender, country, region, age)
   - `app_id` para identificar la aplicación
   - `row_id` para relacionar filas principales con sub-filas demográficas
+
+### Tablas de GoHighLevel (GHL):
+- **`ghl_appointments`**: Métricas de citas/appointments
+  - `date` (DATE): Fecha de inicio del período
+  - `location_id` (STRING): ID del location en GHL
+  - `location_name` (STRING): Nombre del location
+  - `total_scheduled` (INTEGER): Total de citas programadas
+  - `scheduled_paid` (INTEGER): Citas pagadas
+  - `showed` (INTEGER): Citas donde el cliente asistió
+  - `closed` (INTEGER): Citas cerradas/completadas
+  - `scheduled_confirmed` (INTEGER): Citas confirmadas
+  - `uploaded_at` (TIMESTAMP): Fecha de carga
+
+### Consultas SQL útiles para GHL:
+
+**Ver métricas de appointments:**
+```sql
+SELECT 
+  date,
+  location_name,
+  total_scheduled,
+  scheduled_paid,
+  showed,
+  closed,
+  scheduled_confirmed
+FROM `engaged-lamp-470319-j9.facebook_ads.ghl_appointments`
+ORDER BY date DESC
+```
+
+**Resumen de los últimos 30 días:**
+```sql
+SELECT 
+  location_name,
+  SUM(total_scheduled) as total_programadas,
+  SUM(scheduled_paid) as total_pagadas,
+  SUM(showed) as total_asistieron,
+  SUM(closed) as total_cerradas,
+  ROUND(AVG(showed * 100.0 / NULLIF(total_scheduled, 0)), 2) as tasa_asistencia_pct
+FROM `engaged-lamp-470319-j9.facebook_ads.ghl_appointments`
+WHERE date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+GROUP BY location_name
+```
+
+**Tendencia diaria de citas:**
+```sql
+SELECT 
+  date,
+  total_scheduled,
+  showed,
+  ROUND(showed * 100.0 / NULLIF(total_scheduled, 0), 2) as tasa_asistencia_pct
+FROM `engaged-lamp-470319-j9.facebook_ads.ghl_appointments`
+WHERE date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+ORDER BY date DESC
+```
 
 ## ❓ Solución de Problemas
 
@@ -149,9 +221,15 @@ Los datos se guardan en:
 - Asegúrate de que los tokens de Facebook no hayan expirado
 - Revisa que el `appId` sea correcto
 
+### Error con GHL API
+- Verifica que `GHL_API_KEY` sea válido y empiece con `pit-`
+- Asegúrate de que el token tenga los permisos necesarios
+- Revisa los logs del workflow para ver el error específico de GHL
+- Verifica que tu cuenta de GHL tenga al menos un Location configurado
+
 ## 🎯 Próximos Pasos
 
-1. Configura los 4 secrets en GitHub
+1. Configura los 5 secrets en GitHub
 2. Ejecuta el workflow manualmente para probar
 3. Verifica que los datos lleguen a BigQuery
 4. El workflow se ejecutará automáticamente todos los días

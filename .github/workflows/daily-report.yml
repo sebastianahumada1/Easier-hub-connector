@@ -41,9 +41,13 @@ jobs:
           echo "BIGQUERY_PROJECT_ID=${{ secrets.BIGQUERY_PROJECT_ID }}" >> .env
           echo "BIGQUERY_DATASET_ID=${{ secrets.BIGQUERY_DATASET_ID }}" >> .env
           echo "GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json" >> .env
+          echo "GHL_API_KEY=${{ secrets.GHL_API_KEY }}" >> .env
       
       - name: Run Facebook report generation
         run: npm run specific-accounts
+      
+      - name: Run GHL report generation
+        run: npm run ghl-report
       
       - name: Clean up credentials
         if: always()
