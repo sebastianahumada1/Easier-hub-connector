@@ -20,6 +20,7 @@
     "specific-accounts": "npm run build && node dist/generate-specific-accounts.js",
     "custom-dates": "npm run build && node dist/generate-specific-accounts-custom-dates.js",
     "ghl-report": "npm run build && node dist/generate-ghl-report.js",
+    "ghl-report-from-ids": "npm run build && node dist/generate-ghl-report-from-ids.js",
     "dev": "ts-node src/index.ts"
   },
   "keywords": [

@@ -473,6 +473,17 @@ Este comando:
 - Calcula las métricas agregadas
 - Sube los datos a BigQuery en la tabla `ghl_appointments`
 
+### Cargar citas usando IDs manuales
+
+Si desde el Appointment Report exportas los IDs de las citas, puedes usarlos para generar un resumen rápido:
+
+1. Actualiza el arreglo `APPOINTMENT_IDS` en `src/generate-ghl-report-from-ids.ts` con los IDs exportados.
+2. Ejecuta:
+   ```bash
+   npm run ghl-report-from-ids
+   ```
+3. El script descargará cada cita por su ID, calculará métricas básicas (confirmadas, pagadas, etc.) y las subirá a BigQuery en la misma tabla `ghl_appointments`.
+
 ### Consultas SQL útiles en BigQuery:
 
 **Ver métricas de appointments:**

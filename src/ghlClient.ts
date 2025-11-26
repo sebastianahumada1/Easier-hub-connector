@@ -103,6 +103,28 @@ export class GHLClient {
   }
 
   /**
+   * Obtiene una cita específica por su ID
+   */
+  async getAppointmentById(eventId: string): Promise<GHLAppointment | null> {
+    try {
+      const response = await this.axios.get(`/calendars/events/appointments/${eventId}`);
+      const appointment = response.data?.appointment || null;
+
+      if (!appointment) {
+        console.warn(`GHL: No se encontró appointment con ID ${eventId}`);
+      }
+
+      return appointment;
+    } catch (error: any) {
+      console.error(`GHL: Error obteniendo appointment ${eventId}:`, error.message);
+      if (error.response?.data) {
+        console.error('GHL: Detalles del error de appointment:', JSON.stringify(error.response.data, null, 2));
+      }
+      return null;
+    }
+  }
+
+  /**
    * Obtiene appointments para un location y rango de fechas específico
    * @param locationId ID del location
    * @param startDate Fecha inicio en formato YYYY-MM-DD
