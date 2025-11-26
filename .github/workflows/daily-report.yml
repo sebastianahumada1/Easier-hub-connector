@@ -45,17 +45,10 @@ jobs:
       - name: Run Facebook report generation
         run: npm run specific-accounts
       
-      - name: Create GHL accounts file
-        run: echo '${{ secrets.GHL_ACCOUNTS_JSON }}' > data/ghl-accounts.json
-      
-      - name: Run GHL report generation
-        run: npm run ghl-report
-      
       - name: Clean up credentials
         if: always()
         run: |
           rm -f google-credentials.json
           rm -f data/tokens.json
-          rm -f data/ghl-accounts.json
           rm -f .env
 

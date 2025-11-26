@@ -35,8 +35,8 @@ async function generateCustomDatesReport() {
 
   // ⭐ FECHAS FIJAS: 1 nov 2025 al 2 nov 2025
   const dateRange = {
-    since: '2025-11-01',
-    until: '2025-11-20'
+    since: '2025-11-21',
+    until: '2025-11-27'
   };
 
   const newTableId = 'campaign_reports_specific'; // Nueva tabla en BigQuery

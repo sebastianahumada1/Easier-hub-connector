@@ -31,31 +31,3 @@ export interface TokenDebugResponse {
   };
 }
 
-// GoHighLevel (GHL) Types
-export interface GHLAccount {
-  accountId: string;
-  accountName: string;
-  apiKey: string;
-}
-
-export interface GHLAppointmentMetrics {
-  accountId: string;
-  accountName: string;
-  date: string;
-  totalScheduled: number;
-  scheduledPaid: number;
-  showed: number;
-  closed: number;
-  scheduledConfirmed: number;
-}
-
-export interface GHLFunnelMetrics {
-  accountId: string;
-  accountName: string;
-  date: string;
-  funnelName: string;
-  optInRate: number;
-  uniqueViews: number;
-  optIns: number;
-}
-

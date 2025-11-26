@@ -58,26 +58,6 @@ Valor:
 facebook_ads
 ```
 
-#### e) `GHL_ACCOUNTS_JSON`
-Copia el contenido completo del archivo `data/ghl-accounts.json`:
-
-```json
-[
-  {
-    "accountId": "west-texas-premier",
-    "accountName": "West Texas Premier Center",
-    "apiKey": "pit-3718a6ed-6d4c-480a-8e3f-166b12501101"
-  },
-  {
-    "accountId": "another-account",
-    "accountName": "Another Account Name",
-    "apiKey": "pit-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  }
-]
-```
-
-**Nota:** Puedes agregar múltiples cuentas de GoHighLevel. Cada cuenta necesita su propio API key.
-
 ### 2. Horario del Cronjob
 
 El workflow está configurado para ejecutarse:
@@ -138,11 +118,7 @@ El workflow hace lo siguiente:
    - Calcula el rango de fechas (solo el día actual)
    - Obtiene datos de Facebook para las 9 cuentas específicas
    - Sube los datos a BigQuery en la tabla `campaign_reports_specific`
-6. ✅ Ejecuta `npm run ghl-report` que:
-   - Calcula el rango de fechas (solo el día actual)
-   - Obtiene datos de GoHighLevel para todas las cuentas configuradas
-   - Sube los datos a BigQuery en las tablas `ghl_appointments` y `ghl_funnels`
-7. ✅ Limpia los archivos de credenciales
+6. ✅ Limpia los archivos de credenciales
 
 ## 📊 Tablas de BigQuery
 
@@ -156,65 +132,6 @@ Los datos se guardan en:
   - Datos demográficos (gender, country, region, age)
   - `app_id` para identificar la aplicación
   - `row_id` para relacionar filas principales con sub-filas demográficas
-
-### Tablas de GoHighLevel (GHL):
-- **`ghl_appointments`**: Métricas de citas/appointments
-  - `account_id`, `account_name`, `date`
-  - `total_scheduled`: Total de citas programadas
-  - `scheduled_paid`: Citas pagadas
-  - `showed`: Citas donde el cliente asistió
-  - `closed`: Citas cerradas/ganadas
-  - `scheduled_confirmed`: Citas confirmadas
-  
-- **`ghl_funnels`**: Métricas de funnels/landing pages
-  - `account_id`, `account_name`, `date`
-  - `funnel_name`: Nombre del funnel (Qualifying, Survey, Google Ads)
-  - `opt_in_rate`: Tasa de conversión (%)
-  - `unique_views`: Vistas únicas
-  - `opt_ins`: Número de conversiones
-
-### Consultas SQL útiles para GHL:
-
-**Ver métricas de appointments por cuenta:**
-```sql
-SELECT 
-  account_name,
-  date,
-  total_scheduled,
-  scheduled_paid,
-  showed,
-  closed,
-  scheduled_confirmed
-FROM `engaged-lamp-470319-j9.facebook_ads.ghl_appointments`
-ORDER BY date DESC, account_name
-```
-
-**Ver métricas de funnels por tipo:**
-```sql
-SELECT 
-  account_name,
-  funnel_name,
-  date,
-  unique_views,
-  opt_ins,
-  opt_in_rate
-FROM `engaged-lamp-470319-j9.facebook_ads.ghl_funnels`
-WHERE funnel_name LIKE '%Qualifying%'
-ORDER BY date DESC
-```
-
-**Resumen de conversión por funnel (últimos 30 días):**
-```sql
-SELECT 
-  funnel_name,
-  SUM(unique_views) as total_views,
-  SUM(opt_ins) as total_opt_ins,
-  ROUND(AVG(opt_in_rate), 2) as avg_conversion_rate
-FROM `engaged-lamp-470319-j9.facebook_ads.ghl_funnels`
-WHERE date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-GROUP BY funnel_name
-ORDER BY total_opt_ins DESC
-```
 
 ## ❓ Solución de Problemas
 

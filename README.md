@@ -428,49 +428,6 @@ FacebookTokenManager: Verificación completada
 - Puedes ajustar el horario del cron job en `src/scheduler.ts` (línea con `cron.schedule`)
 - Para producción, considera usar PM2 o similar para mantener el proceso ejecutándose
 
-## 📱 Integración con GoHighLevel (GHL)
-
-El sistema también recolecta y sube datos de GoHighLevel a BigQuery.
-
-### Datos de GHL recolectados:
-
-**Appointments (Citas):**
-- Total de citas programadas (scheduled)
-- Citas pagadas (paid)
-- Citas donde el cliente asistió (showed)
-- Citas cerradas/ganadas (closed)
-- Citas confirmadas (confirmed)
-
-**Funnels (Landing Pages):**
-- Qualifying Funnel: tasa de conversión y vistas únicas
-- Survey Funnel: tasa de conversión y vistas únicas
-- Google Ads Funnel: tasa de conversión y vistas únicas
-
-### Configuración:
-
-1. Obtén tu API key de GoHighLevel
-2. Configura tus cuentas en `data/ghl-accounts.json`:
-
-```json
-[
-  {
-    "accountId": "west-texas-premier",
-    "accountName": "West Texas Premier Center",
-    "apiKey": "pit-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  }
-]
-```
-
-3. Ejecuta el reporte de GHL:
-
-```bash
-npm run ghl-report
-```
-
-Los datos se suben a BigQuery en las tablas:
-- `ghl_appointments`: Métricas de citas
-- `ghl_funnels`: Métricas de funnels/landing pages
-
 ## 🤖 Automatización con GitHub Actions
 
 ### Configurar Actualización Diaria Automática
@@ -481,12 +438,11 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
 
 #### Resumen rápido:
 
-1. **Configurar 5 secrets en GitHub:**
+1. **Configurar 4 secrets en GitHub:**
    - `TOKENS_JSON` - Contenido de `data/tokens.json`
    - `GOOGLE_CREDENTIALS` - Contenido de tu archivo de credenciales de GCP
    - `BIGQUERY_PROJECT_ID` - ID del proyecto de BigQuery
    - `BIGQUERY_DATASET_ID` - ID del dataset de BigQuery
-   - `GHL_ACCOUNTS_JSON` - Contenido de `data/ghl-accounts.json`
 
 2. **El workflow se ejecutará:**
    - Automáticamente todos los días a las 11:00 PM hora Colombia (4:00 AM UTC)
@@ -496,9 +452,6 @@ El proyecto incluye un workflow de GitHub Actions que ejecuta automáticamente l
    - Obtiene datos de Facebook del día actual
    - Procesa las 9 cuentas específicas configuradas
    - Sube todo a BigQuery en la tabla `campaign_reports_specific`
-   - Obtiene datos de GoHighLevel (GHL) del día actual
-   - Procesa todas las cuentas GHL configuradas
-   - Sube datos de appointments y funnels a BigQuery
 
 **Ver:** `.github/workflows/daily-report.yml` para más detalles
 
