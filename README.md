@@ -250,6 +250,7 @@ El archivo CSV se guarda en `reports/campaign-report-app1-YYYY-MM-DD.csv`
 BIGQUERY_ENABLED=true
 BIGQUERY_PROJECT_ID=mi-proyecto-gcp
 BIGQUERY_DATASET_ID=facebook_ads
+BIGQUERY_DATASET_LOCATION=US
 BIGQUERY_TABLE_ID=campaign_reports
 GOOGLE_APPLICATION_CREDENTIALS=/Users/tu-usuario/gcp-key.json
 ```
@@ -459,6 +460,9 @@ El sistema recolecta métricas de citas (appointments) de GoHighLevel y las sube
 # GoHighLevel Configuration
 GHL_API_KEY=pit-tu-token-aqui
 GHL_LOCATION_ID=tu-location-id-aqui
+# BigQuery (recomendado para GHL)
+BIGQUERY_DATASET_ID=facebook_ads_reports
+BIGQUERY_DATASET_LOCATION=US
 ```
 
 4. **Ejecuta el reporte de GHL:**

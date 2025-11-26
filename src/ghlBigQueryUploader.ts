@@ -5,6 +5,7 @@ export class GHLBigQueryUploader {
   private bigquery: BigQuery;
   private datasetId: string;
   private tableId: string;
+  private datasetLocation: string;
 
   constructor(
     projectId: string,
@@ -18,6 +19,23 @@ export class GHLBigQueryUploader {
     });
     this.datasetId = datasetId;
     this.tableId = tableId;
+    this.datasetLocation = process.env.BIGQUERY_DATASET_LOCATION || 'US';
+  }
+
+  /**
+   * Crea el dataset si no existe (fuera del modo sandbox)
+   */
+  private async ensureDatasetExists(): Promise<void> {
+    const dataset = this.bigquery.dataset(this.datasetId);
+    const [exists] = await dataset.exists();
+
+    if (!exists) {
+      console.log(
+        `GHL BigQuery: Dataset ${this.datasetId} no existe. Creándolo en ${this.datasetLocation}...`
+      );
+      await this.bigquery.createDataset(this.datasetId, { location: this.datasetLocation });
+      console.log(`GHL BigQuery: Dataset ${this.datasetId} creado exitosamente`);
+    }
   }
 
   /**
@@ -28,6 +46,8 @@ export class GHLBigQueryUploader {
     const table = dataset.table(this.tableId);
 
     try {
+      await this.ensureDatasetExists();
+
       const [exists] = await table.exists();
       
       if (!exists) {
