@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { GHLAppointment, GHLLocation } from './types';
+import { GHLAppointment, GHLLocation, GHLCalendar } from './types';
 
 export class GHLClient {
   private apiKey: string;
@@ -55,6 +55,54 @@ export class GHLClient {
   }
 
   /**
+   * Obtiene todos los calendarios disponibles para un location
+   */
+  async getCalendars(locationId: string): Promise<GHLCalendar[]> {
+    try {
+      console.log(`GHL: Obteniendo calendarios para location ${locationId}...`);
+      const response = await this.axios.get('/calendars/', { params: { locationId } });
+      const calendars: GHLCalendar[] = response.data?.calendars || [];
+      console.log(`GHL: Se encontraron ${calendars.length} calendarios activos`);
+      return calendars;
+    } catch (error: any) {
+      console.error('GHL: Error obteniendo calendarios:', error.message);
+      if (error.response?.data) {
+        console.error('GHL: Detalles del error:', JSON.stringify(error.response.data, null, 2));
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Obtiene eventos para un calendario específico
+   */
+  private async getCalendarEvents(
+    calendarId: string,
+    locationId: string,
+    startTime: string,
+    endTime: string
+  ): Promise<GHLAppointment[]> {
+    try {
+      const response = await this.axios.get('/calendars/events', {
+        params: {
+          calendarId,
+          locationId,
+          startTime,
+          endTime,
+        },
+      });
+
+      return response.data?.events || [];
+    } catch (error: any) {
+      console.error(`GHL: Error obteniendo eventos para calendario ${calendarId}:`, error.message);
+      if (error.response?.data) {
+        console.error('GHL: Detalles del error del calendario:', JSON.stringify(error.response.data, null, 2));
+      }
+      return [];
+    }
+  }
+
+  /**
    * Obtiene appointments para un location y rango de fechas específico
    * @param locationId ID del location
    * @param startDate Fecha inicio en formato YYYY-MM-DD
@@ -70,45 +118,31 @@ export class GHLClient {
       console.log(`GHL: Rango de fechas: ${startDate} a ${endDate}`);
       
       const allAppointments: GHLAppointment[] = [];
-      let skip = 0;
-      const limit = 100; // Máximo por página
-      let hasMore = true;
+      const startTime = `${startDate}T00:00:00Z`;
+      const endTime = `${endDate}T23:59:59Z`;
 
-      // Convertir fechas a timestamps (inicio del día y fin del día)
-      const startTimestamp = new Date(`${startDate}T00:00:00Z`).getTime();
-      const endTimestamp = new Date(`${endDate}T23:59:59Z`).getTime();
+      const calendars = await this.getCalendars(locationId);
 
-      while (hasMore) {
-        try {
-          const response = await this.axios.get(`/calendars/events`, {
-            params: {
-              locationId,
-              startTime: startTimestamp,
-              endTime: endTimestamp,
-              limit,
-              skip,
-            },
-          });
+      if (calendars.length === 0) {
+        console.warn('GHL: No se encontraron calendarios para el location proporcionado');
+        return [];
+      }
 
-          if (response.data && response.data.events) {
-            const appointments = response.data.events;
-            allAppointments.push(...appointments);
-            
-            console.log(`GHL: Obtenidos ${appointments.length} appointments (skip: ${skip})`);
-            
-            // Si obtuvimos menos que el límite, no hay más páginas
-            if (appointments.length < limit) {
-              hasMore = false;
-            } else {
-              skip += limit;
-            }
-          } else {
-            hasMore = false;
-          }
-        } catch (error: any) {
-          console.error(`GHL: Error en paginación (skip: ${skip}):`, error.message);
-          hasMore = false;
+      for (const calendar of calendars) {
+        console.log(`GHL: Obteniendo eventos del calendario "${calendar.name}" (${calendar.id})`);
+        const events = await this.getCalendarEvents(calendar.id, locationId, startTime, endTime);
+
+        if (events.length === 0) {
+          console.log(`GHL: El calendario ${calendar.name} no tiene eventos en el rango solicitado`);
         }
+
+        events.forEach(event => {
+          allAppointments.push({
+            ...event,
+            calendarId: calendar.id,
+            calendarName: calendar.name,
+          } as GHLAppointment);
+        });
       }
 
       console.log(`GHL: Total de appointments obtenidos: ${allAppointments.length}`);

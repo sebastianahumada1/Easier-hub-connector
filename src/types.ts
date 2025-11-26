@@ -68,3 +68,13 @@ export interface GHLLocation {
   [key: string]: any;
 }
 
+export interface GHLCalendar {
+  id: string;
+  name: string;
+  locationId: string;
+  groupId?: string;
+  calendarType?: string;
+  isActive?: boolean;
+  [key: string]: any;
+}
+
