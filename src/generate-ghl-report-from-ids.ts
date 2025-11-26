@@ -29,6 +29,9 @@ const APPOINTMENT_IDS: string[] = [
   'ZBXGCHVhh4avxCbnNUd5',
 ];
 
+const MANUAL_START_DATE = '2025-11-01';
+const MANUAL_END_DATE = '2025-11-26';
+
 const formatDate = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -63,7 +66,15 @@ async function generateReportFromIds() {
   const location = await client.getLocation(ghlLocationId);
   const locationName = location?.name || 'Unknown Location';
 
+  const calendars = await client.getCalendars(ghlLocationId);
+  const calendarNameById = new Map(calendars.map(calendar => [calendar.id, calendar.name]));
+
   const fetchedAppointments: GHLAppointment[] = [];
+  const appointmentsWithinRange: GHLAppointment[] = [];
+  const appointmentsOutsideRange: Array<{ appointment: GHLAppointment; start: Date | null }> = [];
+
+  const rangeStart = new Date(`${MANUAL_START_DATE}T00:00:00Z`);
+  const rangeEnd = new Date(`${MANUAL_END_DATE}T23:59:59Z`);
 
   console.log(`GHL: Descargando ${APPOINTMENT_IDS.length} appointments por ID...`);
 
@@ -89,6 +100,25 @@ async function generateReportFromIds() {
     };
 
     fetchedAppointments.push(normalizedAppointment);
+
+    const appointmentStart = normalizedAppointment.startTime
+      ? new Date(normalizedAppointment.startTime)
+      : normalizedAppointment.dateAdded
+      ? new Date(normalizedAppointment.dateAdded)
+      : null;
+
+    const isWithinRange =
+      appointmentStart !== null &&
+      !Number.isNaN(appointmentStart.getTime()) &&
+      appointmentStart >= rangeStart &&
+      appointmentStart <= rangeEnd;
+
+    if (isWithinRange) {
+      appointmentsWithinRange.push(normalizedAppointment);
+    } else {
+      appointmentsOutsideRange.push({ appointment: normalizedAppointment, start: appointmentStart });
+    }
+
     console.log(`GHL: Appointment ${appointmentId} descargado (${normalizedAppointment.status || 'sin status'})`);
   }
 
@@ -97,25 +127,51 @@ async function generateReportFromIds() {
     return;
   }
 
-  // Determinar rango de fechas basado en los appointments descargados
-  const timestamps = fetchedAppointments
+  console.log('\n=== Appointments encontrados dentro del rango 2025-11-01 -> 2025-11-26 ===');
+  if (appointmentsWithinRange.length === 0) {
+    console.log('⚠️  Ningún appointment coincide con el rango solicitado.');
+  } else {
+    appointmentsWithinRange.forEach(app => {
+      const calendarName = calendarNameById.get(app.calendarId || '') || app.calendarId || 'calendar-desconocido';
+      const start = app.startTime || app.dateAdded || 'sin fecha';
+      const status = app.status || app.appointmentStatus || 'sin status';
+      console.log(`• ${app.id} | ${start} | ${status} | ${calendarName}`);
+    });
+  }
+
+  if (appointmentsOutsideRange.length) {
+    console.log('\n=== Appointments fuera del rango especificado ===');
+    appointmentsOutsideRange.forEach(({ appointment, start }) => {
+      const calendarName = calendarNameById.get(appointment.calendarId || '') || appointment.calendarId || 'calendar-desconocido';
+      const formattedDate = start ? formatDate(start) : 'sin fecha';
+      console.log(`• ${appointment.id} | ${formattedDate} | ${appointment.status || appointment.appointmentStatus || 'sin status'} | ${calendarName}`);
+    });
+  }
+
+  if (appointmentsWithinRange.length === 0) {
+    console.warn('\nNo se subirá nada a BigQuery porque no hubo appointments dentro del rango solicitado.');
+    return;
+  }
+
+  // Determinar rango de fechas basado en los appointments dentro del rango
+  const timestamps = appointmentsWithinRange
     .map(app => new Date(app.startTime || app.dateAdded || new Date()).getTime())
     .filter(time => !Number.isNaN(time));
 
-  const minDate = timestamps.length ? new Date(Math.min(...timestamps)) : new Date();
-  const maxDate = timestamps.length ? new Date(Math.max(...timestamps)) : new Date();
+  const minDate = timestamps.length ? new Date(Math.min(...timestamps)) : rangeStart;
+  const maxDate = timestamps.length ? new Date(Math.max(...timestamps)) : rangeEnd;
 
   const startDate = formatDate(minDate);
   const endDate = formatDate(maxDate);
 
   console.log();
-  console.log(`GHL: Rango cubierto por los appointments: ${startDate} -> ${endDate}`);
-  console.log(`GHL: Total de appointments obtenidos: ${fetchedAppointments.length}`);
+  console.log(`GHL: Rango usado para métricas: ${startDate} -> ${endDate}`);
+  console.log(`GHL: Total de appointments dentro del rango: ${appointmentsWithinRange.length}`);
   console.log();
 
   // Calcular métricas agregadas reutilizando el manager existente
   const metrics = appointmentsManager.calculateMetrics(
-    fetchedAppointments,
+    appointmentsWithinRange,
     ghlLocationId,
     locationName,
     startDate
@@ -145,8 +201,15 @@ async function generateReportFromIds() {
       googleCredentials
     );
 
-    await uploader.uploadMetrics(metrics);
-    console.log('✅ GHL: Métricas subidas exitosamente a BigQuery');
+    try {
+      await uploader.uploadMetrics(metrics);
+      console.log('✅ GHL: Métricas subidas exitosamente a BigQuery');
+    } catch (error: any) {
+      console.error('❌ GHL: Error subiendo métricas a BigQuery:', error.message);
+      if (error.errors) {
+        console.error('Detalles:', JSON.stringify(error.errors, null, 2));
+      }
+    }
   } else {
     console.log('ℹ️  GHL: BigQuery no habilitado, sólo se mostraron las métricas en consola');
   }
